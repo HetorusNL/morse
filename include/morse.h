@@ -4,35 +4,32 @@
 
 class Morse {
 public:
-    Morse();
+    Morse() : sendPin(13), receivePin(12), recvFBPin(11){};
+    Morse(uint8_t sendPin, uint8_t receivePin, uint8_t recvFBPin);
     ~Morse();
 
     void cycle();
     void transmit();
     void receive();
 
-    void printPtrs();   // TEST ONLY!
-    void testCircBuf(); // TEST ONLY!
-
 private:
     // configuration parameters
-    static constexpr int BUFSIZE = 2;
-    static constexpr int MORSE_UNIT_LENGTH = 1000;
-    enum {
-        IDLE,
-
-    } MORSE_STATE;
+    static constexpr int BUFSIZE = 32;
+    static constexpr int MORSE_UNIT_LENGTH = 1000; // in milliseconds
 
     // variables
     CircularBuffer<char, BUFSIZE> sendBuf;
     CircularBuffer<char, BUFSIZE> recvBuf;
     MorseState sendState;
+    uint8_t sendPin;    // defaults to LED pin (13)
+    uint8_t receivePin; // defaults to pin 12
+    uint8_t recvFBPin;  // defaults to pin 11
 
     // morse dictionary
-    static constexpr uint8_t NULL_ = 0; // used as terminator of letters/digits
-    static constexpr uint8_t SHORT = 1; // same length as LONG_
-    static constexpr uint8_t LONG_ = 3; // same length as SHORT
-    static constexpr uint8_t LETTER_BREAK = 3;
+    static constexpr uint8_t NULL_ = 0;        // used as terminator of letters/digits
+    static constexpr uint8_t SHORT = 1;        // same length as LONG_
+    static constexpr uint8_t LONG_ = 3;        // same length as SHORT
+    static constexpr uint8_t LETTER_BREAK = 3; // not in morse dictionary!
     static constexpr uint8_t WORD_BREAK = 7;
     static constexpr uint8_t MORSE_DICT[][5] = {
         // letters
@@ -63,6 +60,7 @@ private:
         {LONG_, SHORT, LONG_, LONG_}, // Y
         {LONG_, LONG_, SHORT, SHORT}, // Z
         // numbers
+        {LONG_, LONG_, LONG_, LONG_, LONG_}, // 0
         {SHORT, LONG_, LONG_, LONG_, LONG_}, // 1
         {SHORT, SHORT, LONG_, LONG_, LONG_}, // 2
         {SHORT, SHORT, SHORT, LONG_, LONG_}, // 3
@@ -72,6 +70,22 @@ private:
         {LONG_, LONG_, SHORT, SHORT, SHORT}, // 7
         {LONG_, LONG_, LONG_, SHORT, SHORT}, // 8
         {LONG_, LONG_, LONG_, LONG_, SHORT}, // 9
-        {LONG_, LONG_, LONG_, LONG_, LONG_}  // 0
+        // word seperator (space)
+        {WORD_BREAK},
+        // invalid (empty) entry
+        {},
     };
+
+    // functions
+
+    // get the MORSE_DICT entry for the provided character
+    const uint8_t *getMorseEntry(char c);
+    // function is called when sending first character
+    void initTransmitterForSymbol();
+    // function is called when sending subsequent characters
+    void reInitTransmitterForSymbol();
+    // function is called when starting to transmit a symbol
+    void transmitSymbol();
+    // function to determine if the symbolIndex points to the last symbol
+    inline bool isLastSymbolIndex();
 };
