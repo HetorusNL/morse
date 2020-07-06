@@ -4,18 +4,34 @@
 
 class Morse {
 public:
-    Morse() : sendPin(13), receivePin(12), recvFBPin(11){};
+    Morse();
     Morse(uint8_t sendPin, uint8_t receivePin, uint8_t recvFBPin);
     ~Morse();
 
+    // function to be called cyclically that performs the morse transceiving
     void cycle();
-    void transmit();
-    void receive();
+
+    // function to write data (single character)
+    inline void write(char character) {
+        sendBuf.put(character);
+    };
+
+    // function to write data (pointer to NULL terminated character array)
+    inline void write(const char *characters) {
+        const char *c = characters;
+        while (*c != '\0') {
+            write(*c);
+            c++;
+        }
+    };
+
+    // function to read data (single character)
+    char read();
 
 private:
     // configuration parameters
     static constexpr int BUFSIZE = 32;
-    static constexpr int MORSE_UNIT_LENGTH = 1000; // in milliseconds
+    static constexpr int MORSE_UNIT_LENGTH = 150; // in milliseconds
 
     // variables
     CircularBuffer<char, BUFSIZE> sendBuf;
@@ -78,6 +94,12 @@ private:
 
     // functions
 
+    // init function called by the constructors
+    void init();
+    // the transmit function that sends pending data via morse code
+    void transmit();
+    // the receive function that receives data via morse code
+    void receive();
     // get the MORSE_DICT entry for the provided character
     const uint8_t *getMorseEntry(char c);
     // function is called when sending first character

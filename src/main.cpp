@@ -11,18 +11,13 @@ public:
     ~MainClass();
 
     // implement arduino functionality
-    void setup() {
-        pinMode(13, OUTPUT);
-        pinMode(12, INPUT_PULLUP);
-        pinMode(11, OUTPUT);
-    }
+    void setup() {}
     void loop() {
-        unsigned long _millis = millis();
-        if (_millis > lastMillis + 100) {
-            digitalWrite(13, !digitalRead(13));
-            lastMillis = _millis;
+        // if there is data available on Serial port, pass to morse class
+        if (Serial.available()) {
+            morse.write(Serial.read());
         }
-        digitalWrite(11, !digitalRead(12));
+        // run the morse cycle
         morse.cycle();
     }
 };

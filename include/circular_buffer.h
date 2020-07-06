@@ -9,7 +9,7 @@ public:
 
     int size() const { return N; }
 
-    // put and get data from the buffer
+    // put data in the buffer
     void put(T element) {
         if (putPtr + 1 == pastLastElementPtr) {
             // buffer rols over
@@ -32,11 +32,13 @@ public:
         }
     }
 
+    // returns true if data is available in the buffer
     inline bool available() {
         // data is available when the pointers are not equal
         return putPtr != getPtr;
     }
 
+    // get data from the buffer, returns default value when no data available!
     T get() {
         if (available()) {
             // create new element and get the value from the pointer
@@ -51,12 +53,6 @@ public:
             return value;
         }
         return T(); // no data available, return default constructor of T!
-    }
-
-    void getPtrs(T *&putPtr, T *&getPtr, T *&pastLastElementPtr) {
-        putPtr = this->putPtr;
-        getPtr = this->getPtr;
-        pastLastElementPtr = this->pastLastElementPtr;
     }
 
 private:

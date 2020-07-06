@@ -8,12 +8,31 @@ Morse::Morse(uint8_t sendPin, uint8_t receivePin, uint8_t recvFBPin)
     : sendPin(sendPin),
       receivePin(receivePin),
       recvFBPin(recvFBPin) {
-    Serial.println("hello from morse");
-    static_assert(sizeof(MORSE_DICT) > 0, "MORSE_DICT can't be empty!");
-    static_assert(sizeof(MORSE_DICT[0]) > 0, "MORSE_DICT can't be empty!");
+    init();
 }
 
+Morse::Morse() : sendPin(13), receivePin(12), recvFBPin(11) {
+    init();
+};
+
 Morse::~Morse() {}
+
+void Morse::init() {
+    // validation asserts
+    static_assert(sizeof(MORSE_DICT) > 0, "MORSE_DICT can't be empty!");
+    static_assert(sizeof(MORSE_DICT[0]) > 0, "MORSE_DICT can't be empty!");
+
+    // initialization of the Morse class
+    Serial.println("Hello from Morse!");
+    Serial.print("Morse unit length [ms] = ");
+    Serial.println(MORSE_UNIT_LENGTH);
+    write("Hallo");
+
+    // set the pinmode of the input and output pins
+    pinMode(sendPin, OUTPUT);
+    pinMode(receivePin, INPUT_PULLUP);
+    pinMode(recvFBPin, OUTPUT);
+}
 
 void Morse::cycle() {
     // run transceive cycle
@@ -70,7 +89,10 @@ void Morse::transmit() {
 }
 
 void Morse::receive() {
-    // not implemented
+    // show state of IR LED input on the feedback LED (inverted)
+    digitalWrite(recvFBPin, !digitalRead(receivePin));
+
+    // receive function body not implemented!
 }
 
 const uint8_t *Morse::getMorseEntry(char c) {
